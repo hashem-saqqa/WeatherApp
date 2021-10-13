@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
     android:background="@color/black_shade_1"
-    >
+    tools:context=".MainActivity">
 
     <ProgressBar
         android:id="@+id/idPBLoading"
@@ -19,13 +18,12 @@
         android:id="@+id/idTVLoading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="make sure the Location is turend on"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        android:gravity="center"
         android:layout_below="@id/idPBLoading"
         android:layout_marginTop="30dp"
-        />
+        android:gravity="center"
+        android:text="make sure the Location is turned on"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
 
     <RelativeLayout
         android:id="@+id/idRLHome"
@@ -132,14 +130,13 @@
             android:id="@+id/idTVForecast"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@id/idRVWeather"
+            android:layout_margin="8dp"
+            android:layout_marginHorizontal="8dp"
             android:layout_marginBottom="10dp"
             android:text="Today's Weather Forecast"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:layout_below="@id/idTVCondition"
-            android:layout_marginTop="50dp"
-            android:layout_marginHorizontal="8dp"
-            />
+            android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/idRVWeather"
@@ -148,8 +145,9 @@
             android:layout_alignParentBottom="true"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            android:layout_below="@id/idTVForecast"
+            android:layout_marginBottom="40dp"
             />
+
 
     </RelativeLayout>
 
