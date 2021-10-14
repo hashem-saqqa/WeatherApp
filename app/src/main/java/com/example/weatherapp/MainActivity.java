@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -161,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 //    }
 
     private void getWeatherInfo(String coordinates) {
+        Log.d("TAG", "getWeatherInfo: " + coordinates);
 
         String url = "https://api.weatherapi.com/v1/forecast.json?key=f5bf130cbf1344368f6170651211310&q=" + coordinates + "&days=1&aqi=yes&alerts=yes";
 
@@ -180,9 +182,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
                     Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+                    if (response.getJSONObject("location").getString("region").equals("")) {
 
-                    cityName = response.getJSONObject("location").getString("name");
-                    cityNameTV.setText(cityName);
+                        cityName = response.getJSONObject("location").getString("tz_id");
+                        cityName = cityName.substring(cityName.indexOf("/")+1);
+                        cityNameTV.setText(cityName);
+
+                    } else {
+
+                        cityName = response.getJSONObject("location").getString("region");
+                        cityNameTV.setText(cityName);
+
+                    }
                     conditionTV.setText(condition);
                     if (isDay == 1) {
                         Picasso.get().load("https://images.unsplash.com/photo-1566228015668-4c45dbc4e2f5?ixid=MnwxMjA3fDB8MHx2aXN1YWwtc2VhcmNofDR8fHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60").into(backIV);
