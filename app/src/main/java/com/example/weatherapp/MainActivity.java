@@ -181,7 +181,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     int isDay = response.getJSONObject("current").getInt("is_day");
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
-                    Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+                    Picasso.get().load("https:".concat(conditionIcon)).into(iconIV);
+
                     if (response.getJSONObject("location").getString("region").equals("")) {
 
                         cityName = response.getJSONObject("location").getString("tz_id");
