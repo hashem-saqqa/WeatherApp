@@ -14,7 +14,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -55,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private LocationManager locationManager;
     private int PERMISSION_CODE = 1;
     private String cityName;
+    private String coordinates;
 
     @Override
 
@@ -78,24 +78,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconIV = findViewById(R.id.idIVIcon);
         searchIV = findViewById(R.id.idIVSearch);
         loadingTV = findViewById(R.id.idTVLoading);
+
         weatherRVModalArrayList = new ArrayList<>();
         weatherRVAdapter = new WeatherRVAdapter(this, weatherRVModalArrayList);
         weatherRV.setAdapter(weatherRVAdapter);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_CODE);
+
         }
         Location location = null;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Log.e("TAGg", "onCreate: Granted");
+
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
         }
         if (location != null) {
-            cityName = getCityName(location.getLongitude(), location.getLatitude());
-            getWeatherInfo(cityName);
+
+            coordinates = location.getLatitude() + " , " + location.getLongitude();
+            getWeatherInfo(coordinates);
+
         } else {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 0, this);
         }
@@ -106,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 if (city.isEmpty()) {
                     Toast.makeText(MainActivity.this, "Please enter city name", Toast.LENGTH_SHORT).show();
                 } else {
-                    cityNameTV.setText(cityName);
                     getWeatherInfo(city);
                 }
             }
@@ -126,39 +132,38 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    private String getCityName(double longitude, double latitude) {
-        String cityName = "Not found";
-        Geocoder gcd = new Geocoder(MainActivity.this, Locale.getDefault());
-        try {
-            List<Address> addresses = gcd.getFromLocation(latitude, longitude, 1);
-            Log.d("TAGg", "getCityName: addresses: " + addresses);
+//    private String getCityName(double longitude, double latitude) {
+//        String cityName = "Not found";
+//        Geocoder gcd = new Geocoder(MainActivity.this, Locale.getDefault());
+//        try {
+//            List<Address> addresses = gcd.getFromLocation(latitude, longitude, 1);
+//            Log.d("TAGg", "getCityName: addresses: " + addresses);
+//
+//            for (Address adr : addresses) {
+//                if (adr != null) {
+//                    String city = adr.getLocality();
+//                    Log.d("TAGg", "getCityName: city: " + city);
+//                    Log.d("TAGg", "getCityName: adr: " + adr);
+//                    if (city != null) {
+//                        cityName = city;
+//                    } else {
+//                        cityName = "Ramallah";
+////                        Log.d("TAG", "City Not Found");
+////                        Toast.makeText(this, "User City Not Found", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return cityName;
+//    }
 
-            for (Address adr : addresses) {
-                if (adr != null) {
-                    String city = adr.getLocality();
-                    Log.d("TAGg", "getCityName: city: " + city);
-                    Log.d("TAGg", "getCityName: adr: " + adr);
-                    if (city != null) {
-                        cityName = city;
-                    } else {
-                        cityName = "Ramallah";
-//                        Log.d("TAG", "City Not Found");
-//                        Toast.makeText(this, "User City Not Found", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
+    private void getWeatherInfo(String coordinates) {
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return cityName;
-    }
+        String url = "https://api.weatherapi.com/v1/forecast.json?key=f5bf130cbf1344368f6170651211310&q=" + coordinates + "&days=1&aqi=yes&alerts=yes";
 
-    private void getWeatherInfo(String cityName) {
-
-        String url = "https://api.weatherapi.com/v1/forecast.json?key=f5bf130cbf1344368f6170651211310&q=" + cityName + "&days=1&aqi=yes&alerts=yes";
-
-        cityNameTV.setText(cityName);
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -175,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     String condition = response.getJSONObject("current").getJSONObject("condition").getString("text");
                     String conditionIcon = response.getJSONObject("current").getJSONObject("condition").getString("icon");
                     Picasso.get().load("http:".concat(conditionIcon)).into(iconIV);
+
+                    cityName = response.getJSONObject("location").getString("name");
+                    cityNameTV.setText(cityName);
                     conditionTV.setText(condition);
                     if (isDay == 1) {
                         Picasso.get().load("https://images.unsplash.com/photo-1566228015668-4c45dbc4e2f5?ixid=MnwxMjA3fDB8MHx2aXN1YWwtc2VhcmNofDR8fHxlbnwwfHx8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60").into(backIV);
@@ -207,8 +215,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("TAGg", "onErrorResponse: " + cityName);
-                Log.e("TAGg", "onErrorResponse: the error " + error);
                 Toast.makeText(MainActivity.this, "please enter valid city name ", Toast.LENGTH_SHORT).show();
             }
         });
@@ -218,9 +224,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.e("TAGg", "onLocationChanged: inside the method");
-        cityName = getCityName(location.getLongitude(), location.getLatitude());
-        getWeatherInfo(cityName);
+        coordinates = location.getLatitude() + " , " + location.getLongitude();
+        getWeatherInfo(coordinates);
 
         locationManager.removeUpdates(this);
 
@@ -244,6 +249,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onPause() {
         super.onPause();
-//        locationManager.removeUpdates(this);
+        locationManager.removeUpdates(this);
     }
 }
