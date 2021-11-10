@@ -1,6 +1,6 @@
 # WeatherApp
 <tr>
-  <th> in the morning mode </th>
+  <th> in the morning mode </th><br/>
   <th>in the night mode</th>
 </tr>
 <tr>
